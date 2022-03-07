@@ -10,3 +10,20 @@ namespace constants
     const int BRICK_GAP = 3;
     const int BRICK_MARGIN = 25;
 }
+
+enum FontType
+{
+    Default,
+    Menu,
+    Score,
+    GameOver
+};
+
+enum GameState
+{
+    Initial,
+    Playing,
+    Paused,
+    Won,
+    Lost
+};

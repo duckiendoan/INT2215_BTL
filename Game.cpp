@@ -1,3 +1,4 @@
+#include <string>
 #include "Game.h"
 #include "BallHandler.h"
 
@@ -26,6 +27,7 @@ void Game::run() {
     bool gameRunning = true;
     SDL_Event event;
 
+    state = Playing;
     while (gameRunning)
     {
         while (SDL_PollEvent(&event))
@@ -34,27 +36,61 @@ void Game::run() {
                 gameRunning = false;
         }
 
+        switch (state) {
+            case Initial:
+                break;
+            case Playing: {
+                handlePaddleMovement(paddle);
+                ballHandler.checkEdgeCollision(paddle, trials);
+                ballHandler.checkPaddleCollision(paddle);
+                ballHandler.checkBrickCollision(bricks);
+                ballHandler.updatePosition();
 
-        handlePaddleMovement(paddle);
-        ballHandler.checkEdgeCollision(paddle, trials);
-        ballHandler.checkPaddleCollision(paddle);
-        ballHandler.checkBrickCollision(bricks);
-        ballHandler.updatePosition();
+                if (trials < 0)
+                {
+                    trials++;
+                    state = Lost;
+                    std::cout << "You lost!" << std::endl;
+                }
 
-        if (trials < 0)
-            std::cout << "You lost!" << std::endl;
-        // Rendering
+                // Rendering
+                std::string attemptText = "Attempts: " + std::to_string(trials);
+                window.clearScreen();
+                window.render(background);
+                window.renderText(attemptText.c_str(), Score, 10, 10);
+                window.render(paddle);
+                window.render(ball);
 
-        window.clearScreen();
-        window.render(background);
-        window.render(paddle);
-        window.render(ball);
+                for (auto brick: bricks)
+                    if (brick.shown)
+                        window.render(brick);
 
-        for (auto brick: bricks)
-            if (brick.shown)
-                window.render(brick);
+                window.display();
+                break;
+            }
 
-        window.display();
+            case Paused:
+                break;
+            case Won:
+                break;
+            case Lost:
+                std::string attemptText = "Attempts: " + std::to_string(trials);
+                window.clearScreen();
+                window.render(background);
+                window.renderText(attemptText.c_str(), Score, 10, 10);
+                window.renderText("You lost!", Score, constants::SCREEN_WIDTH / 2, constants::SCREEN_HEIGHT / 2);
+                window.render(paddle);
+                window.render(ball);
+
+                for (auto brick: bricks)
+                    if (brick.shown)
+                        window.render(brick);
+
+                window.display();
+
+                break;
+        }
+
         SDL_Delay(5);
     }
 
@@ -78,7 +114,7 @@ void Game::generateBricks() {
     {
         int row = i / 8;
         int column = i % 8;
-        float brick_y = constants::BRICK_MARGIN + constants::BRICK_GAP * (row) + newBrickHeight * row;
+        float brick_y = constants::BRICK_MARGIN + 15 + constants::BRICK_GAP * (row) + newBrickHeight * row;
         float brick_x = constants::BRICK_MARGIN + constants::BRICK_GAP * (column) + newBrickWidth * column;
 
         bricks.emplace_back(brick_x, brick_y, brickTex);

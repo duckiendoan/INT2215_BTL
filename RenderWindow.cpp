@@ -15,12 +15,15 @@ RenderWindow::RenderWindow(const char *title, int w, int h) : window(nullptr), r
 
     if (renderer == nullptr)
         std::cout << "Failed to initialize renderer: " << SDL_GetError() << std::endl;
+
+    scoreFont = TTF_OpenFont("assets/fonts/VCR_OSD_MONO_1.001.ttf", 24);
 }
 
 void RenderWindow::cleanUp()
 {
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+    TTF_CloseFont(scoreFont);
 }
 
 SDL_Texture *RenderWindow::loadTexture(const char *filePath)
@@ -63,4 +66,30 @@ void RenderWindow::render(GameObject& entity)
 void RenderWindow::display()
 {
     SDL_RenderPresent(renderer);
+}
+
+void RenderWindow::renderText(const char *text, FontType type, int x, int y)
+{
+    SDL_Surface* textSurface;
+    // Set color to black
+    SDL_Color color = { 255, 255, 255 };
+
+    switch (type) {
+        case Score:
+            textSurface = TTF_RenderText_Solid(scoreFont, text, color);
+            break;
+        default:
+            break;
+    }
+
+    if (!textSurface) {
+        std::cout << "Failed to render text: " << SDL_GetError() << std::endl;
+    }
+
+    SDL_Texture* text_texture= SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Rect dest = { x, y, textSurface->w, textSurface->h };
+    SDL_RenderCopy(renderer, text_texture, nullptr, &dest);
+
+    SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(textSurface);
 }

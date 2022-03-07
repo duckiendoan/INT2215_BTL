@@ -20,6 +20,7 @@ private:
     int trials;
     int bricksPerRow;
     int numRows;
+    GameState state = Initial;
     void generateBricks();
     void loadBackground();
     void handlePaddleMovement(GameObject& paddle);
