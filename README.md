@@ -1,7 +1,3 @@
-# Bài tập lớn
-
-Created: February 27, 2022 8:07 PM
-
 # Bài tập lớn INT2215
 
 An attempt to recreate the classic Atari Breakout game
