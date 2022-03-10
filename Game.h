@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "RenderWindow.h"
 #include "Common.h"
+#include "BallHandler.h"
 #include <vector>
 
 class Game
@@ -17,11 +18,15 @@ private:
     std::vector<SDL_Texture*> backgroundTex;
 
     std::vector<GameObject> bricks;
+    SDL_Event event;
     int trials;
     int bricksPerRow;
     int numRows;
+    bool gameRunning;
     GameState state = Initial;
     void generateBricks();
     void loadBackground();
+    void update(BallHandler& ballHandler, GameObject& paddle);
+    void render(BallHandler& ballHandler, GameObject& paddle, GameObject& background);
     void handlePaddleMovement(GameObject& paddle);
 };

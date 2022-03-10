@@ -7,6 +7,7 @@
 class BallHandler
 {
 public:
+    GameObject& ball;
     BallHandler(GameObject& ball, double angle, float ballSpeed);
     void checkEdgeCollision(GameObject& paddle, int& trials);
     void checkPaddleCollision(GameObject& paddle);
@@ -14,7 +15,6 @@ public:
     void updatePosition();
     void resetBallPosition(GameObject& paddle);
 private:
-    GameObject& ball;
     double ballAngle;
     float ballSpeed;
 };

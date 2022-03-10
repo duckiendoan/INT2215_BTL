@@ -11,7 +11,7 @@ RenderWindow::RenderWindow(const char *title, int w, int h) : window(nullptr), r
     if (window == nullptr)
         std::cout << "Failed to initialize window: " << SDL_GetError() << std::endl;
 
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
     if (renderer == nullptr)
         std::cout << "Failed to initialize renderer: " << SDL_GetError() << std::endl;
