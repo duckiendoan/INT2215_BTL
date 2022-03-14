@@ -1,6 +1,6 @@
 #include <string>
 #include "Game.h"
-#include "BallHandler.h"
+#include <iostream>
 
 Game::Game(int p_trials, int bricks_per_row, int num_rows)
     : trials(p_trials), bricksPerRow(bricks_per_row), numRows(num_rows), gameRunning(false)
@@ -15,14 +15,15 @@ void Game::run() {
     GameObject paddle(0.4 * constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH, paddleTex);
     paddle.setScale(0.2f * constants::SCREEN_WIDTH / paddle.getWidth());
 
-    GameObject ball(paddle.x + paddle.getWidth() / 2 - paddle.getHeight() / 2, paddle.y - paddle.getHeight(), ballTex);
+    float ballX = paddle.x + paddle.getWidth() / 2 - paddle.getHeight() / 2;
+    float ballY = paddle.y - paddle.getHeight();
+    double ballAngle = constants::PI / 3;
+
+    Ball ball(ballX, ballY, ballTex, ballAngle, constants::DEFAULT_BALL_SPEED);
     ball.setScale(paddle.getScale());
 
     GameObject background(0, 0, backgroundTex[0]);
     background.setScale(float(constants::SCREEN_WIDTH) / background.getWidth());
-
-    double ballAngle = constants::PI / 3;
-    BallHandler ballHandler(ball, ballAngle, constants::DEFAULT_BALL_SPEED);
 
     SDL_Event event;
 
@@ -43,12 +44,12 @@ void Game::run() {
         accumulator += double(frameTime) / delta;
 
         while (accumulator >= 1) {
-            update(ballHandler, paddle);
+            update(ball, paddle, delta / 1000);
             updates++;
             accumulator--;
         }
 
-        render(ballHandler, paddle, background);
+        render(ball, paddle, background);
         fps++;
         if (SDL_GetTicks64() - timer > 1000) {
             timer += 1000;
@@ -56,13 +57,16 @@ void Game::run() {
             updates = 0;
             fps = 0;
         }
-        SDL_Delay(5);
+        //SDL_Delay(5);
     }
 
     window.cleanUp();
+    SDL_DestroyTexture(ballTex);
+    SDL_DestroyTexture(brickTex);
+    SDL_DestroyTexture(paddleTex);
 }
 
-void Game::update(BallHandler &ballHandler, GameObject &paddle) {
+void Game::update(Ball& ballHandler, GameObject &paddle, double dt) {
 
     while (SDL_PollEvent(&event))
     {
@@ -78,7 +82,7 @@ void Game::update(BallHandler &ballHandler, GameObject &paddle) {
             ballHandler.checkEdgeCollision(paddle, trials);
             ballHandler.checkPaddleCollision(paddle);
             ballHandler.checkBrickCollision(bricks);
-            ballHandler.updatePosition();
+            ballHandler.updatePosition(dt);
 
             if (trials < 0)
             {
@@ -97,7 +101,7 @@ void Game::update(BallHandler &ballHandler, GameObject &paddle) {
             break;
     }
 }
-void Game::render(BallHandler &ballHandler, GameObject &paddle, GameObject &background) {
+void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
     switch (state) {
         case Initial:
             break;
@@ -108,7 +112,7 @@ void Game::render(BallHandler &ballHandler, GameObject &paddle, GameObject &back
             window.render(background);
             window.renderText(attemptText.c_str(), Score, 10, 10);
             window.render(paddle);
-            window.render(ballHandler.ball);
+            window.render(ball);
 
             for (auto brick: bricks)
                 if (brick.shown)
@@ -129,7 +133,7 @@ void Game::render(BallHandler &ballHandler, GameObject &paddle, GameObject &back
             window.renderText(attemptText.c_str(), Score, 10, 10);
             window.renderText("Game over!", Score, constants::SCREEN_WIDTH / 2, constants::SCREEN_HEIGHT / 2);
             window.render(paddle);
-            window.render(ballHandler.ball);
+            window.render(ball);
 
             for (auto brick: bricks)
                 if (brick.shown)

@@ -42,21 +42,6 @@ void RenderWindow::clearScreen()
 
 void RenderWindow::render(GameObject& entity)
 {
-    /*
-    SDL_Rect src;
-    //SDL_QueryTexture(texture, nullptr, nullptr, &src.w, &src.h);
-    src.x = entity.getCurrentFrame().x;
-    src.y = entity.getCurrentFrame().y;
-    src.w = entity.getCurrentFrame().w;
-    src.h = entity.getCurrentFrame().h;
-    */
-    /*
-    SDL_Rect dst;
-    dst.x = entity.getX();
-    dst.y = entity.getY();
-    dst.w = entity.getCurrentFrame().w * scale;
-    dst.h = entity.getCurrentFrame().h * scale;
-    */
     entity.currentFrame.x = (int)entity.x;
     entity.currentFrame.y = (int)entity.y;
 

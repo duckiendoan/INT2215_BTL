@@ -2,7 +2,7 @@
 #include "GameObject.h"
 #include "RenderWindow.h"
 #include "Common.h"
-#include "BallHandler.h"
+#include "Ball.h"
 #include <vector>
 
 class Game
@@ -26,7 +26,7 @@ private:
     GameState state = Initial;
     void generateBricks();
     void loadBackground();
-    void update(BallHandler& ballHandler, GameObject& paddle);
-    void render(BallHandler& ballHandler, GameObject& paddle, GameObject& background);
+    void update(Ball& ballHandler, GameObject& paddle, double dt);
+    void render(Ball& ballHandler, GameObject& paddle, GameObject& background);
     void handlePaddleMovement(GameObject& paddle);
 };

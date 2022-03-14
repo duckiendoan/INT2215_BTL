@@ -14,6 +14,7 @@ public:
     int getWidth();
     int getHeight();
     bool shown;
+    static bool checkCollision(GameObject& obj1, GameObject& obj2);
 private:
     SDL_Texture* texture;
     float scale;

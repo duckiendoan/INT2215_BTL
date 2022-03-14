@@ -32,3 +32,8 @@ int GameObject::getHeight() {
 float GameObject::getScale() {
     return scale;
 }
+
+bool GameObject::checkCollision(GameObject &obj1, GameObject &obj2) {
+    return (obj1.x + obj1.getWidth() > obj2.x && obj1.x < obj2.x + obj2.getWidth() &&
+        obj1.y + obj1.getHeight() > obj2.y && obj1.y < obj2.y + obj2.getHeight());
+}
