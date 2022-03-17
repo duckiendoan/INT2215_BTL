@@ -51,12 +51,14 @@ void Ball::updatePosition(double dt) {
     y -= (ballSpeed * dt) * sin(ballAngle);
 }
 
-void Ball::checkBrickCollision(std::vector<GameObject> &bricks) {
+void Ball::checkBrickCollision(std::vector<GameObject> &bricks, int& remainingBricks, int& score) {
     for (int i = 0; i < bricks.size(); i++) {
         GameObject brick = bricks[i];
         if (brick.shown) {
             if (GameObject::checkCollision(*this, brick)) {
                 bricks[i].shown = false;
+                remainingBricks--;
+                score += 30;
 
                 float ballcenterx = x + 0.5f * getWidth();
                 float ballcentery = y + 0.5f * getHeight();

@@ -13,7 +13,7 @@ int main(int argc, char* args[]) {
         cout << "SDL error: " << SDL_GetError() << endl;
     if (TTF_Init() != 0)
         cout << "SDL_ttf error: " << TTF_GetError() << endl;
-    Game g(3, BRICKS_PER_ROW, NUM_OF_ROWS);
+    Game g(3, 7, 2);
     g.run();
 
     SDL_Quit();

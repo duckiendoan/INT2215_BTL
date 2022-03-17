@@ -22,11 +22,14 @@ private:
     int trials;
     int bricksPerRow;
     int numRows;
+    int remainingBricks;
+    int score;
     bool gameRunning;
     GameState state = Initial;
     void generateBricks();
     void loadBackground();
-    void update(Ball& ballHandler, GameObject& paddle, double dt);
-    void render(Ball& ballHandler, GameObject& paddle, GameObject& background);
+    void update(Ball& ball, GameObject& paddle, double dt);
+    void render(Ball& ball, GameObject& paddle, GameObject& background);
     void handlePaddleMovement(GameObject& paddle);
+    void reset(Ball& ball, GameObject& paddle, bool next_level);
 };

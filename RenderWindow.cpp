@@ -2,7 +2,6 @@
 #include <SDL2/SDL_image.h>
 #include <iostream>
 #include "RenderWindow.h"
-#include "GameObject.h"
 
 RenderWindow::RenderWindow(const char *title, int w, int h) : window(nullptr), renderer(nullptr)
 {
@@ -16,6 +15,7 @@ RenderWindow::RenderWindow(const char *title, int w, int h) : window(nullptr), r
     if (renderer == nullptr)
         std::cout << "Failed to initialize renderer: " << SDL_GetError() << std::endl;
 
+    // Load font
     scoreFont = TTF_OpenFont("assets/fonts/VCR_OSD_MONO_1.001.ttf", 24);
 }
 
@@ -57,11 +57,9 @@ void RenderWindow::renderText(const char *text, FontType type, int x, int y)
 {
     SDL_Surface* textSurface;
     // Set color to black
-    SDL_Color color = { 255, 255, 255 };
-
     switch (type) {
         case Score:
-            textSurface = TTF_RenderText_Solid(scoreFont, text, color);
+            textSurface = TTF_RenderText_Solid(scoreFont, text, {255, 255, 255});
             break;
         default:
             break;
@@ -72,8 +70,8 @@ void RenderWindow::renderText(const char *text, FontType type, int x, int y)
     }
 
     SDL_Texture* text_texture= SDL_CreateTextureFromSurface(renderer, textSurface);
-    SDL_Rect dest = { x, y, textSurface->w, textSurface->h };
-    SDL_RenderCopy(renderer, text_texture, nullptr, &dest);
+    SDL_Rect dst = { x, y, textSurface->w, textSurface->h };
+    SDL_RenderCopy(renderer, text_texture, nullptr, &dst);
 
     SDL_DestroyTexture(text_texture);
     SDL_FreeSurface(textSurface);
