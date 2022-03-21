@@ -48,6 +48,14 @@ void RenderWindow::render(GameObject& entity)
     SDL_RenderCopy(renderer, entity.getTexture(), nullptr, &entity.currentFrame);
 }
 
+void RenderWindow::renderButton(Button &entity)
+{
+    entity.currentFrame.x = (int)entity.x;
+    entity.currentFrame.y = (int)entity.y;
+
+    SDL_RenderCopy(renderer, entity.getTexture(), &entity.srcRect, &entity.currentFrame);
+}
+
 void RenderWindow::display()
 {
     SDL_RenderPresent(renderer);
@@ -75,4 +83,36 @@ void RenderWindow::renderText(const char *text, FontType type, int x, int y)
 
     SDL_DestroyTexture(text_texture);
     SDL_FreeSurface(textSurface);
+}
+
+void RenderWindow::renderText(const char *text, FontType type, int(*x)(int w, int h), int(*y)(int w, int h))
+{
+    SDL_Surface* textSurface;
+    // Set color to black
+    switch (type) {
+        case Score:
+            textSurface = TTF_RenderText_Solid(scoreFont, text, {255, 255, 255});
+            break;
+        default:
+            break;
+    }
+
+    if (!textSurface) {
+        std::cout << "Failed to render text: " << SDL_GetError() << std::endl;
+    }
+
+    SDL_Texture* text_texture= SDL_CreateTextureFromSurface(renderer, textSurface);
+    int w = textSurface->w;
+    int h = textSurface->h;
+    SDL_Rect dst = { x(w, h), y(w, h), w, h };
+    SDL_RenderCopy(renderer, text_texture, nullptr, &dst);
+
+    SDL_DestroyTexture(text_texture);
+    SDL_FreeSurface(textSurface);
+}
+
+void RenderWindow::renderText(Text &textEntity)
+{
+    textEntity.initTexture(renderer);
+    render(textEntity);
 }

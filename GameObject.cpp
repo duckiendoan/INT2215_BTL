@@ -1,6 +1,4 @@
-#include <iostream>
 #include "SDL2/SDL_image.h"
-#include "SDL2/SDL.h"
 #include "GameObject.h"
 
 GameObject::GameObject(float p_x, float p_y, SDL_Texture *p_tex) : x(p_x), y(p_y), texture(p_tex)
@@ -9,6 +7,10 @@ GameObject::GameObject(float p_x, float p_y, SDL_Texture *p_tex) : x(p_x), y(p_y
     currentFrame.y = p_y;
     SDL_QueryTexture(p_tex, nullptr, nullptr, &currentFrame.w, &currentFrame.h);
     shown = true;
+}
+
+GameObject::GameObject()
+{
 }
 
 SDL_Texture *GameObject::getTexture() {

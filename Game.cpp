@@ -1,14 +1,15 @@
 #include <string>
 #include "Game.h"
+#include "Text.h"
 #include <iostream>
 
 Game::Game(int p_trials, int bricks_per_row, int num_rows)
     : trials(p_trials), bricksPerRow(bricks_per_row), numRows(num_rows), gameRunning(false), score(0)
 {
-
 }
 
 void Game::run() {
+    loadButtons();
     loadBackground();
     generateBricks();
     // Create paddle and ball
@@ -72,12 +73,19 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
     {
         if (event.type == SDL_QUIT)
             gameRunning = false;
+        if (event.type == SDL_MOUSEBUTTONUP && pauseBtn.getState() == BUTTON_STATE_HOVER) {
+            if (state == Playing)
+                state = Paused;
+            else if (state == Paused)
+                state = Playing;
+        }
     }
 
     switch (state) {
         case Initial:
             break;
         case Playing: {
+            pauseBtn.update();
             handlePaddleMovement(paddle);
             ball.checkEdgeCollision(paddle, trials);
             ball.checkPaddleCollision(paddle);
@@ -95,6 +103,7 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
         }
 
         case Paused:
+            pauseBtn.update();
             break;
         case Won: {
             const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
@@ -113,23 +122,31 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
     }
 }
 void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
-    std::string attemptText = "Attempts: " + std::to_string(trials);
-    std::string scoreText = "Score: " + std::to_string(score);
+    std::string attempt = "Attempts: " + std::to_string(trials);
+    std::string scoreTxt = "Score: " + std::to_string(score);
+
     switch (state) {
         case Initial:
             break;
         case Playing:
         case Won:
+        case Paused:
         case Lost: {
             // Rendering
             window.clearScreen();
             window.render(background);
-            window.renderText(attemptText.c_str(), Score, 10, 10);
-            window.renderText(scoreText.c_str(), Score, 10, 30);
+            window.renderButton(pauseBtn);
+            // Text rendering
+            window.renderText(attempt.c_str(), Score, 10, 10);
+            window.renderText(scoreTxt.c_str(), Score, 10, 30);
             if (state == Won)
-                window.renderText("You won!", Score, constants::SCREEN_WIDTH / 2, constants::SCREEN_HEIGHT / 2);
+                window.renderText("You won!", Score,
+                                  [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
+                                  [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
             if (state == Lost)
-                window.renderText("Game over!", Score, constants::SCREEN_WIDTH / 2, constants::SCREEN_HEIGHT / 2);
+                window.renderText("Game over", Score,
+                                  [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
+                                  [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
 
             window.render(paddle);
             window.render(ball);
@@ -141,9 +158,6 @@ void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
             window.display();
             break;
         }
-
-        case Paused:
-            break;
     }
 }
 void Game::generateBricks() {
@@ -203,4 +217,11 @@ void Game::reset(Ball& ball, GameObject& paddle, bool nextLevel) {
 void Game::loadBackground() {
     backgroundTex.push_back(window.loadTexture("assets\\background1.png"));
     backgroundTex.push_back(window.loadTexture("assets\\background2.png"));
+}
+
+void Game::loadButtons() {
+    pauseBtn.setScale(0.05);
+    pauseBtn.x = constants::SCREEN_WIDTH - pauseBtn.getWidth() - 10;
+    pauseBtn.y = 10;
+
 }
