@@ -11,7 +11,7 @@ enum ButtonState
 class Button: public GameObject
 {
 public:
-    Button(SDL_Rect srcRect, SDL_Texture* tex);
+    Button(SDL_Rect srcRect, SDL_Texture* tex, int numBtn);
     void update();
     ButtonState getState();
     SDL_Rect srcRect;

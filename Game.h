@@ -16,9 +16,16 @@ private:
     SDL_Texture* ballTex = window.loadTexture("assets\\ball.png");
     SDL_Texture* brickTex = window.loadTexture("assets\\brick.png");
     SDL_Texture* pauseBtnTex = window.loadTexture("assets\\pause.png");
+    SDL_Texture* pauseMenuTex = window.loadTexture("assets\\paused_menu.png");
+    SDL_Texture* pauseMenuBtnTex = window.loadTexture("assets\\pause_button_set.png");
+
     std::vector<SDL_Texture*> backgroundTex;
     std::vector<GameObject> bricks;
-    Button pauseBtn = Button({0, 0, 865, 865}, pauseBtnTex);
+    Button pauseBtn = Button({0, 0, 43, 43}, pauseBtnTex, 1);
+    Button homeBtn = Button({0, 0, 816, 816}, pauseMenuBtnTex, 3);
+    Button continueBtn = Button({0, 816, 816, 816}, pauseMenuBtnTex, 3);
+    Button resetBtn = Button({0, 1632, 816, 816}, pauseMenuBtnTex, 3);
+    GameObject pauseMenu = GameObject(0, 0, pauseMenuTex);
 
     SDL_Event event;
     int trials;

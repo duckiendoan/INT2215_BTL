@@ -16,7 +16,7 @@ public:
     bool shown;
     static bool checkCollision(GameObject& obj1, GameObject& obj2);
 private:
-    float scale;
+    float scale = 1;
 protected:
     SDL_Texture* texture;
     GameObject();

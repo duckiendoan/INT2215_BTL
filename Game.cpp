@@ -73,11 +73,19 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
     {
         if (event.type == SDL_QUIT)
             gameRunning = false;
-        if (event.type == SDL_MOUSEBUTTONUP && pauseBtn.getState() == BUTTON_STATE_HOVER) {
-            if (state == Playing)
+        if (event.type == SDL_MOUSEBUTTONUP) {
+            if (pauseBtn.getState() == BUTTON_STATE_HOVER && state == Playing)
                 state = Paused;
-            else if (state == Paused)
+            else if (continueBtn.getState() == BUTTON_STATE_HOVER)
                 state = Playing;
+            else if (resetBtn.getState() == BUTTON_STATE_HOVER)
+            {
+                reset(ball, paddle, false);
+            }
+        }
+        if (event.type == SDL_KEYDOWN) {
+            if (event.key.keysym.sym == SDLK_p && state == Playing)
+                state = Paused;
         }
     }
 
@@ -103,7 +111,10 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
         }
 
         case Paused:
-            pauseBtn.update();
+            //pauseBtn.update();
+            continueBtn.update();
+            homeBtn.update();
+            resetBtn.update();
             break;
         case Won: {
             const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
@@ -135,6 +146,7 @@ void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
             // Rendering
             window.clearScreen();
             window.render(background);
+            //window.render(test);
             window.renderButton(pauseBtn);
             // Text rendering
             window.renderText(attempt.c_str(), Score, 10, 10);
@@ -154,6 +166,13 @@ void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
             for (auto brick: bricks)
                 if (brick.shown)
                     window.render(brick);
+            if (state == Paused)
+            {
+                window.render(pauseMenu);
+                window.renderButton(homeBtn);
+                window.renderButton(continueBtn);
+                window.renderButton(resetBtn);
+            }
 
             window.display();
             break;
@@ -177,7 +196,7 @@ void Game::generateBricks() {
     {
         int row = i / bricksPerRow;
         int column = i % bricksPerRow;
-        float brick_y = constants::BRICK_MARGIN + 30 + constants::BRICK_GAP * (row) + newBrickHeight * row;
+        float brick_y = constants::BRICK_MARGIN + 50 + constants::BRICK_GAP * (row) + newBrickHeight * row;
         float brick_x = constants::BRICK_MARGIN + constants::BRICK_GAP * (column) + newBrickWidth * column;
 
         bricks.emplace_back(brick_x, brick_y, brickTex);
@@ -220,8 +239,27 @@ void Game::loadBackground() {
 }
 
 void Game::loadButtons() {
-    pauseBtn.setScale(0.05);
+    pauseBtn.setScale(1);
     pauseBtn.x = constants::SCREEN_WIDTH - pauseBtn.getWidth() - 10;
     pauseBtn.y = 10;
+
+    pauseMenu.setScale(0.4 * constants::SCREEN_WIDTH / pauseMenu.getWidth());
+    pauseMenu.x = 0.5 * constants::SCREEN_WIDTH - 0.5 * pauseMenu.getWidth();
+    pauseMenu.y = 0.5 * constants::SCREEN_HEIGHT - 0.5 * pauseMenu.getHeight();
+
+    int btnWidth = homeBtn.srcRect.w;
+    homeBtn.setScale(0.09 * constants::SCREEN_WIDTH / btnWidth);
+    continueBtn.setScale(homeBtn.getScale());
+    resetBtn.setScale(homeBtn.getScale());
+
+    float gap = float(pauseMenu.getWidth() - homeBtn.getWidth() * 4) / 2;
+    homeBtn.x = pauseMenu.x + 0.5 * homeBtn.getWidth();
+    homeBtn.y = pauseMenu.y + pauseMenu.getHeight() * 0.45f;
+
+    continueBtn.x = homeBtn.x + homeBtn.getWidth() + gap;
+    continueBtn.y = homeBtn.y;
+
+    resetBtn.x = continueBtn.x + homeBtn.getWidth() + gap;
+    resetBtn.y = homeBtn.y;
 
 }
