@@ -21,9 +21,9 @@ enum FontType
 
 enum GameState
 {
-    Initial,
-    Playing,
-    Paused,
-    Won,
-    Lost
+    GAME_STATE_INITIAL,
+    GAME_STATE_PLAYING,
+    GAME_STATE_PAUSED,
+    GAME_STATE_WON,
+    GAME_STATE_LOST
 };

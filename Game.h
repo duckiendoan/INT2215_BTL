@@ -17,14 +17,14 @@ private:
     SDL_Texture* brickTex = window.loadTexture("assets\\brick.png");
     SDL_Texture* pauseBtnTex = window.loadTexture("assets\\pause.png");
     SDL_Texture* pauseMenuTex = window.loadTexture("assets\\paused_menu.png");
-    SDL_Texture* pauseMenuBtnTex = window.loadTexture("assets\\pause_button_set.png");
+    SDL_Texture* pauseMenuBtnTex = window.loadTexture("assets\\pause_menu_buttons.png");
 
     std::vector<SDL_Texture*> backgroundTex;
     std::vector<GameObject> bricks;
-    Button pauseBtn = Button({0, 0, 43, 43}, pauseBtnTex, 1);
-    Button homeBtn = Button({0, 0, 816, 816}, pauseMenuBtnTex, 3);
-    Button continueBtn = Button({0, 816, 816, 816}, pauseMenuBtnTex, 3);
-    Button resetBtn = Button({0, 1632, 816, 816}, pauseMenuBtnTex, 3);
+    Button pauseBtn = Button({0, 0, 50, 50}, pauseBtnTex, 1);
+    Button homeBtn = Button({0, 0, 203, 203}, pauseMenuBtnTex, 4);
+    Button continueBtn = Button({0, 203, 203, 203}, pauseMenuBtnTex, 4);
+    Button resetBtn = Button({0, 609, 203, 203}, pauseMenuBtnTex, 4);
     GameObject pauseMenu = GameObject(0, 0, pauseMenuTex);
 
     SDL_Event event;
@@ -34,12 +34,12 @@ private:
     int remainingBricks;
     int score;
     bool gameRunning;
-    GameState state = Initial;
+    GameState state = GAME_STATE_INITIAL;
     void generateBricks();
     void loadBackground();
     void update(Ball& ball, GameObject& paddle, double dt);
     void render(Ball& ball, GameObject& paddle, GameObject& background);
-    void handlePaddleMovement(GameObject& paddle);
+    void handlePaddleMovement(GameObject& paddle, const Uint8* currentKeyStates, bool mouse_moved);
     void reset(Ball& ball, GameObject& paddle, bool next_level);
     void loadButtons();
 };

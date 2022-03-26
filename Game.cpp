@@ -28,7 +28,7 @@ void Game::run() {
 
     SDL_Event event;
 
-    state = Playing;
+    state = GAME_STATE_PLAYING;
     gameRunning = true;
     auto lastTime = SDL_GetTicks64();
     // Update the game 60 times per second
@@ -68,68 +68,63 @@ void Game::run() {
 }
 
 void Game::update(Ball& ball, GameObject &paddle, double dt) {
-
+    bool mouseMoved = false;
     while (SDL_PollEvent(&event))
     {
         if (event.type == SDL_QUIT)
             gameRunning = false;
         if (event.type == SDL_MOUSEBUTTONUP) {
-            if (pauseBtn.getState() == BUTTON_STATE_HOVER && state == Playing)
-                state = Paused;
+            if (pauseBtn.getState() == BUTTON_STATE_HOVER && state == GAME_STATE_PLAYING)
+                state = GAME_STATE_PAUSED;
             else if (continueBtn.getState() == BUTTON_STATE_HOVER)
-                state = Playing;
+                state = GAME_STATE_PLAYING;
             else if (resetBtn.getState() == BUTTON_STATE_HOVER)
             {
                 reset(ball, paddle, false);
             }
         }
-        if (event.type == SDL_KEYDOWN) {
-            if (event.key.keysym.sym == SDLK_p && state == Playing)
-                state = Paused;
-        }
+        if (event.type == SDL_MOUSEMOTION)
+            mouseMoved = true;
     }
-
+    const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
     switch (state) {
-        case Initial:
+        case GAME_STATE_INITIAL:
             break;
-        case Playing: {
+        case GAME_STATE_PLAYING: {
+            if (currentKeyStates[SDL_SCANCODE_P]) {
+                state = GAME_STATE_PAUSED;
+            }
             pauseBtn.update();
-            handlePaddleMovement(paddle);
+            handlePaddleMovement(paddle, currentKeyStates, mouseMoved);
             ball.checkEdgeCollision(paddle, trials);
             ball.checkPaddleCollision(paddle);
             ball.checkBrickCollision(bricks, remainingBricks, score);
             ball.updatePosition(dt);
 
-            if (remainingBricks == 0) state = Won;
+            if (remainingBricks == 0) state = GAME_STATE_WON;
             if (trials < 0)
             {
                 trials++;
-                state = Lost;
+                state = GAME_STATE_LOST;
                 std::cout << "You lost!" << std::endl;
             }
             break;
         }
 
-        case Paused:
+        case GAME_STATE_PAUSED:
             //pauseBtn.update();
             continueBtn.update();
             homeBtn.update();
             resetBtn.update();
             break;
-        case Won: {
-            const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
+        case GAME_STATE_WON:
+        case GAME_STATE_LOST:
+        {
             if (currentKeyStates[SDL_SCANCODE_RETURN]) {
-                reset(ball, paddle, true);
+                reset(ball, paddle, state == GAME_STATE_WON);
             }
             break;
         }
-
-        case Lost:
-            const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
-            if (currentKeyStates[SDL_SCANCODE_RETURN]) {
-                reset(ball, paddle, false);
-            }
-            break;
     }
 }
 void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
@@ -137,12 +132,12 @@ void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
     std::string scoreTxt = "Score: " + std::to_string(score);
 
     switch (state) {
-        case Initial:
+        case GAME_STATE_INITIAL:
             break;
-        case Playing:
-        case Won:
-        case Paused:
-        case Lost: {
+        case GAME_STATE_PLAYING:
+        case GAME_STATE_WON:
+        case GAME_STATE_PAUSED:
+        case GAME_STATE_LOST: {
             // Rendering
             window.clearScreen();
             window.render(background);
@@ -151,11 +146,11 @@ void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
             // Text rendering
             window.renderText(attempt.c_str(), Score, 10, 10);
             window.renderText(scoreTxt.c_str(), Score, 10, 30);
-            if (state == Won)
+            if (state == GAME_STATE_WON)
                 window.renderText("You won!", Score,
                                   [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
                                   [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
-            if (state == Lost)
+            if (state == GAME_STATE_LOST)
                 window.renderText("Game over", Score,
                                   [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
                                   [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
@@ -166,7 +161,7 @@ void Game::render(Ball &ball, GameObject &paddle, GameObject &background) {
             for (auto brick: bricks)
                 if (brick.shown)
                     window.render(brick);
-            if (state == Paused)
+            if (state == GAME_STATE_PAUSED)
             {
                 window.render(pauseMenu);
                 window.renderButton(homeBtn);
@@ -207,10 +202,20 @@ void Game::generateBricks() {
     remainingBricks = bricksPerRow * numRows;
 }
 
-void Game::handlePaddleMovement(GameObject &paddle) {
-    int mouse_x, mouse_y;
-    SDL_GetMouseState(&mouse_x, &mouse_y);
-    float distance = mouse_x - paddle.x - paddle.getWidth() / 2;
+void Game::handlePaddleMovement(GameObject &paddle, const Uint8* currentKeyStates, bool mouse_moved) {
+    float distance = 0;
+    if (currentKeyStates[SDL_SCANCODE_LEFT]) {
+        distance = -30;
+    }
+    else if (currentKeyStates[SDL_SCANCODE_RIGHT]) {
+        distance = 30;
+    }
+    else if (mouse_moved){
+        int mouse_x, mouse_y;
+        SDL_GetMouseState(&mouse_x, &mouse_y);
+        distance = mouse_x - paddle.x - paddle.getWidth() / 2;
+    }
+
     float paddle_vel = distance / 3;
 
     // Distance is too small or the paddle is going out of screen
@@ -231,7 +236,7 @@ void Game::reset(Ball& ball, GameObject& paddle, bool nextLevel) {
     ball.resetPosition(paddle);
     trials = 3;
     score = 0;
-    state = Playing;
+    state = GAME_STATE_PLAYING;
 }
 void Game::loadBackground() {
     backgroundTex.push_back(window.loadTexture("assets\\background1.png"));

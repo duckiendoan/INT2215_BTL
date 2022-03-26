@@ -4,8 +4,7 @@
 enum ButtonState
 {
     BUTTON_STATE_DEFAULT,
-    BUTTON_STATE_HOVER,
-    BUTTON_STATE_CLICKED
+    BUTTON_STATE_HOVER
 };
 
 class Button: public GameObject
