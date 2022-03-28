@@ -1,6 +1,6 @@
 # Bài tập lớn INT2215
 
-An attempt to recreate the classic Atari Breakout game
+An attempt to recreate the classic [Atari Breakout](https://en.wikipedia.org/wiki/Breakout_(video_game)) game.
 
 ## Student information
 
@@ -15,9 +15,10 @@ An attempt to recreate the classic Atari Breakout game
 ## TODO
 
 - [x]  Classic game features (ball, paddle and collisions)
-- [ ]  Game menu
+- [x]  Game menu
 - [ ]  Brick explosion on collision
-- [ ]  Unlimited levels
+- [x]  Unlimited levels
+- [ ]  Audio
 - [ ]  Themes
 
 ## Building

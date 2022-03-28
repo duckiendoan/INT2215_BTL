@@ -111,8 +111,10 @@ void RenderWindow::renderText(const char *text, FontType type, int(*x)(int w, in
     SDL_FreeSurface(textSurface);
 }
 
-void RenderWindow::renderText(Text &textEntity)
+void RenderWindow::renderSprite(Sprite &entity)
 {
-    textEntity.initTexture(renderer);
-    render(textEntity);
+    entity.currentFrame.x = (int)entity.x;
+    entity.currentFrame.y = (int)entity.y;
+
+    SDL_RenderCopy(renderer, entity.getTexture(), &entity.srcRect, &entity.currentFrame);
 }

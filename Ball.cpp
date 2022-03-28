@@ -34,18 +34,6 @@ void Ball::checkPaddleCollision(GameObject &paddle) {
         float ball_center_x = x + getWidth() / 2.0f;
         float hit_x = (paddle.x + paddle.getWidth() / 2.0f) - ball_center_x;
         double maxBounceAngle = 5 * constants::PI / 12;
-        //double maxBounceAngle = constants::PI / 4;
-        /*
-        float k = 0;
-
-        if (hit_x < paddle.getWidth() / 2) {
-            k = 2 * hit_x / paddle.getWidth();
-            ballAngle = constants::PI - k * constants::PI / 2 - 0.3;
-        } else {
-            k = 2 * (paddle.getWidth() - hit_x) / paddle.getWidth();
-            ballAngle = k * constants::PI / 2 + 0.3;
-        }
-        */
         // https://gamedev.stackexchange.com/questions/4253/in-pong-how-do-you-calculate-the-balls-direction-when-it-bounces-off-the-paddl
         float normalizedHitX = hit_x / (paddle.getWidth() / 2.0f);
         ballAngle = normalizedHitX * maxBounceAngle + constants::PI / 2;
@@ -57,7 +45,7 @@ void Ball::updatePosition(double dt) {
     y -= (ballSpeed * dt) * sin(ballAngle);
 }
 
-void Ball::checkBrickCollision(std::vector<GameObject> &bricks, int& remainingBricks, int& score) {
+void Ball::checkBrickCollision(std::vector<Sprite> &bricks, int& remainingBricks, int& score) {
     for (int i = 0; i < bricks.size(); i++) {
         GameObject brick = bricks[i];
         if (brick.shown) {
