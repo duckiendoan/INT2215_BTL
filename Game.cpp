@@ -3,19 +3,20 @@
 #include <iostream>
 
 Game::Game(int p_trials, int bricks_per_row, int num_rows)
-    : trials(p_trials), bricksPerRow(bricks_per_row), numRows(num_rows), gameRunning(false), score(0)
+    : attempts(p_trials), gameRunning(false), score(0)
 {
     srand(time(nullptr));
+    brickManager = new BrickManager(bricks_per_row, num_rows, brickSprite);
 }
 
 void Game::run() {
     loadButtons();
-    generateBricks();
+    brickManager->generateBricks();
     // Create paddle and ball
     GameObject paddle(0.4 * constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH, paddleTex);
     paddle.setScale(0.2f * constants::SCREEN_WIDTH / paddle.getWidth());
 
-    float ballX = paddle.x + paddle.getWidth() / 2 - paddle.getHeight() / 2;
+    float ballX = paddle.x + paddle.getWidth() * 0.5f - paddle.getHeight() * 0.5f;
     float ballY = paddle.y - paddle.getHeight();
     double ballAngle = constants::PI / 3;
 
@@ -32,6 +33,7 @@ void Game::run() {
     double accumulator = 0;
     int updates = 0, fps = 0;
     long long timer = 0;
+    soundPlayer.playMusic();
 
     while (gameRunning)
     {
@@ -48,31 +50,35 @@ void Game::run() {
 
         render(ball, paddle);
         fps++;
+
         if (SDL_GetTicks64() - timer > 1000) {
             timer += 1000;
             std::cout << updates << " updates, " << fps << " fps" << "\n";
             updates = 0;
             fps = 0;
         }
-        //SDL_Delay(5);
     }
 
     window.cleanUp();
     SDL_DestroyTexture(ballTex);
     SDL_DestroyTexture(brickTex);
     SDL_DestroyTexture(paddleTex);
-    //CEV_gifAnimFree(confettiGif.animation);
+    SDL_DestroyTexture(pauseBtnTex);
+    SDL_DestroyTexture(pauseMenuBtnTex);
+    SDL_DestroyTexture(pauseMenuTex);
+    SDL_DestroyTexture(startMenuBtnTex);
+    SDL_DestroyTexture(gameTitleTex);
+    SDL_DestroyTexture(backgroundTex);
+    delete brickManager;
 }
 
 void Game::update(Ball& ball, GameObject &paddle, double dt) {
     bool mouseMoved = false;
-    bool mouseClicked = false;
     while (SDL_PollEvent(&event))
     {
         if (event.type == SDL_QUIT)
             gameRunning = false;
         if (event.type == SDL_MOUSEBUTTONUP) {
-            //std::cout << "Mouse Button up!" << std::endl;
             if (pauseBtn.state == BUTTON_STATE_HOVER)
             {
                 state = GAME_STATE_PAUSED;
@@ -98,9 +104,47 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
                 reset(ball, paddle, false);
                 startBtn.state = BUTTON_STATE_DEFAULT;
             }
+            else if (settingsBtn.state == BUTTON_STATE_HOVER)
+            {
+                settingsMenu = true;
+                settingsBtn.state = BUTTON_STATE_DEFAULT;
+            }
+            else if (helpBtn.state == BUTTON_STATE_HOVER)
+            {
+                helpMenu = true;
+                helpBtn.state = BUTTON_STATE_DEFAULT;
+            }
+            else if (okButton.state == BUTTON_STATE_HOVER)
+            {
+                if (settingsMenu) settingsMenu = false;
+                if (helpMenu) helpMenu = false;
+                okButton.state = BUTTON_STATE_DEFAULT;
+            }
+            else if (musicCheckboxBtn.state == BUTTON_STATE_HOVER)
+            {
+                musicCheckboxBtn.swapState();
+                if (soundPlayer.musicPlaying)
+                {
+                    soundPlayer.pauseMusic();
+                    soundPlayer.musicPlaying = false;
+                } else {
+                    soundPlayer.resumeMusic();
+                    soundPlayer.musicPlaying = true;
+                }
+            }
+            else if (sfxCheckBoxBtn.state == BUTTON_STATE_HOVER)
+            {
+                sfxCheckBoxBtn.swapState();
+                if (soundPlayer.sfxPlaying)
+                {
+                    soundPlayer.sfxPlaying = false;
+                } else {
+                    soundPlayer.sfxPlaying = true;
+                }
+            }
             else if (exitBtn.state == BUTTON_STATE_HOVER)
                 gameRunning = false;
-
+            soundPlayer.playSfx("button_click");
         }
         if (event.type == SDL_MOUSEMOTION)
             mouseMoved = true;
@@ -108,26 +152,45 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
     const Uint8* currentKeyStates = SDL_GetKeyboardState(nullptr);
     switch (state) {
         case GAME_STATE_INITIAL:
-            startBtn.update();
-            settingsBtn.update();
-            helpBtn.update();
-            exitBtn.update();
+            if (!settingsMenu && !helpMenu)
+            {
+                startBtn.update();
+                settingsBtn.update();
+                helpBtn.update();
+                exitBtn.update();
+            }
+            else
+            {
+                okButton.update();
+                if (settingsMenu)
+                {
+                    musicCheckboxBtn.update();
+                    sfxCheckBoxBtn.update();
+                }
+            }
             break;
         case GAME_STATE_PLAYING: {
             if (currentKeyStates[SDL_SCANCODE_P]) {
                 state = GAME_STATE_PAUSED;
             }
+            animator.updateAnimation();
             pauseBtn.update();
             handlePaddleMovement(paddle, currentKeyStates, mouseMoved);
-            ball.checkEdgeCollision(paddle, trials);
+            ball.checkEdgeCollision(paddle, attempts);
             ball.checkPaddleCollision(paddle);
-            ball.checkBrickCollision(bricks, remainingBricks, score);
+            int newScore = brickManager->checkBallBricksCollision(ball);
+            score += newScore;
+
+            if (newScore > 0 && rand() % 10 > 4)
+            {
+                animator.startAnimation(brickManager->lastHitX, brickManager->lastHitY);
+            }
             ball.updatePosition(dt);
 
-            if (remainingBricks == 0) state = GAME_STATE_WON;
-            if (trials < 0)
+            if (brickManager->getRemainingBricks() == 0) state = GAME_STATE_WON;
+            if (attempts < 0)
             {
-                trials++;
+                attempts++;
                 state = GAME_STATE_LOST;
                 std::cout << "You lost!" << std::endl;
             }
@@ -151,7 +214,7 @@ void Game::update(Ball& ball, GameObject &paddle, double dt) {
     }
 }
 void Game::render(Ball &ball, GameObject &paddle) {
-    std::string attempt = "Attempts: " + std::to_string(trials);
+    std::string attempt = "Attempts: " + std::to_string(attempts);
     std::string scoreTxt = "Score: " + std::to_string(score);
 
     switch (state) {
@@ -163,6 +226,19 @@ void Game::render(Ball &ball, GameObject &paddle) {
             window.renderButton(settingsBtn);
             window.renderButton(helpBtn);
             window.renderButton(exitBtn);
+            if (settingsMenu)
+            {
+                menuSprite.getFrame(1);
+                window.renderSprite(menuSprite);
+                window.renderButton(musicCheckboxBtn);
+                window.renderButton(sfxCheckBoxBtn);
+                window.renderButton(okButton);
+            } else if (helpMenu)
+            {
+                menuSprite.getFrame(0);
+                window.renderSprite(menuSprite);
+                window.renderButton(okButton);
+            }
             window.display();
             break;
         case GAME_STATE_PLAYING:
@@ -172,26 +248,24 @@ void Game::render(Ball &ball, GameObject &paddle) {
             // Rendering
             window.clearScreen();
             window.render(background);
-            //window.render(test);
+            animator.renderAnimation();
             window.renderButton(pauseBtn);
             // Text rendering
             window.renderText(attempt.c_str(), Score, 10, 10);
             window.renderText(scoreTxt.c_str(), Score, 10, 30);
             if (state == GAME_STATE_WON)
-                window.renderText("You won!", Score,
+                window.renderText("You won! Press [Enter] to enter the next level!", Score,
                                   [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
                                   [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
             if (state == GAME_STATE_LOST)
-                window.renderText("Game over", Score,
+                window.renderText("Game over! Press [Enter] to try again!", Score,
                                   [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
                                   [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
 
             window.render(paddle);
             window.render(ball);
+            brickManager->renderBricks(window);
 
-            for (auto brick: bricks)
-                if (brick.shown)
-                    window.renderSprite(brick);
             if (state == GAME_STATE_PAUSED)
             {
                 window.render(pauseMenu);
@@ -205,49 +279,21 @@ void Game::render(Ball &ball, GameObject &paddle) {
         }
     }
 }
-void Game::generateBricks() {
-    int brickHeight = brickSheet.spriteHeight, brickWidth = brickSheet.spriteWidth;
-
-    bricks.clear();
-    bricks.reserve(bricksPerRow * numRows);
-    float gapPerBrick = float((bricksPerRow - 1) * constants::BRICK_GAP) / float(bricksPerRow);
-    float newBrickWidth = (1 / float(bricksPerRow)) *
-            (constants::SCREEN_WIDTH - constants::BRICK_MARGIN * 2) - gapPerBrick;
-    float brickScale = newBrickWidth / float(brickWidth);
-    float newBrickHeight = float(brickHeight) * brickScale;
-    Sprite currentBrick = brickSheet.GetSprite(0);
-
-    for (int i = 0; i < bricksPerRow * numRows; i++)
-    {
-        int row = i / bricksPerRow;
-        int column = i % bricksPerRow;
-        float brick_y = constants::BRICK_MARGIN + 50 + constants::BRICK_GAP * (row) + newBrickHeight * row;
-        float brick_x = constants::BRICK_MARGIN + constants::BRICK_GAP * (column) + newBrickWidth * column;
-        if (column == 0)
-            currentBrick = brickSheet.GetSprite(rand() % brickSheet.spriteCount);
-        currentBrick.x = brick_x;
-        currentBrick.y = brick_y;
-        bricks.push_back(currentBrick);
-        //bricks.emplace_back(brick_x, brick_y, brickTex);
-    }
-
-    for (auto &brick : bricks)
-        brick.setScale(brickScale);
-    remainingBricks = bricksPerRow * numRows;
-}
 
 void Game::handlePaddleMovement(GameObject &paddle, const Uint8* currentKeyStates, bool mouse_moved) {
     float distance = 0;
     if (currentKeyStates[SDL_SCANCODE_LEFT]) {
         distance = -30;
     }
+
     else if (currentKeyStates[SDL_SCANCODE_RIGHT]) {
         distance = 30;
     }
+
     else if (mouse_moved){
         int mouse_x, mouse_y;
         SDL_GetMouseState(&mouse_x, &mouse_y);
-        distance = mouse_x - paddle.x - paddle.getWidth() / 2;
+        distance = mouse_x - paddle.x - paddle.getWidth() * 0.5f;
     }
 
     float paddle_vel = distance / 3;
@@ -261,19 +307,19 @@ void Game::handlePaddleMovement(GameObject &paddle, const Uint8* currentKeyState
 
 void Game::reset(Ball& ball, GameObject& paddle, bool nextLevel) {
     if (nextLevel) {
-        numRows++;
-        bricksPerRow++;
+        brickManager->nextLevel();
     }
-    generateBricks();
+    brickManager->generateBricks();
     paddle.x = 0.4 * constants::SCREEN_WIDTH;
     paddle.y = constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH;
     ball.resetPosition(paddle);
-    trials = 3;
+    attempts = 3;
     score = 0;
     state = GAME_STATE_PLAYING;
 }
 
-void Game::loadButtons() {
+void Game::loadButtons()
+{
     pauseBtn.setScale(1);
     pauseBtn.x = constants::SCREEN_WIDTH - pauseBtn.getWidth() - 10;
     pauseBtn.y = 7;
@@ -283,7 +329,6 @@ void Game::loadButtons() {
     gameTitle.y = constants::SCREEN_HEIGHT * 0.35 - gameTitle.getHeight() * 0.35;
     loadPauseMenuButtons();
     loadStartMenuButtons();
-
 }
 
 void Game::loadStartMenuButtons()
@@ -303,9 +348,26 @@ void Game::loadStartMenuButtons()
     exitBtn.setScale(startBtn.getScale());
     exitBtn.x = startBtn.x;
     exitBtn.y = helpBtn.y + helpBtn.getHeight();
+
+    menuSprite.setScale(startBtn.getScale());
+    menuSprite.x = constants::SCREEN_WIDTH * 0.5 - menuSprite.getWidth() * 0.5;
+    menuSprite.y = constants::SCREEN_HEIGHT * 0.5 - menuSprite.getHeight() * 0.5;
+
+    okButton.setScale(startBtn.getScale());
+    okButton.x = menuSprite.x + menuSprite.getWidth() * 0.5f - 0.5f * okButton.getWidth();
+    okButton.y = menuSprite.y + menuSprite.getHeight() * 0.82f;
+
+    musicCheckboxBtn.setScale(startBtn.getScale() + 0.3);
+    sfxCheckBoxBtn.setScale(startBtn.getScale() + 0.3);
+    musicCheckboxBtn.x = menuSprite.x + menuSprite.getWidth() * 0.75f;
+    sfxCheckBoxBtn.x = musicCheckboxBtn.x;
+
+    musicCheckboxBtn.y = menuSprite.y + menuSprite.getHeight() * 0.5f - musicCheckboxBtn.getHeight() * 0.7f;
+    sfxCheckBoxBtn.y = musicCheckboxBtn.y + 1.1f * musicCheckboxBtn.getHeight();
 }
 
-void Game::loadPauseMenuButtons() {
+void Game::loadPauseMenuButtons()
+{
     pauseMenu.setScale(0.4 * constants::SCREEN_WIDTH / pauseMenu.getWidth());
     pauseMenu.x = 0.5f * constants::SCREEN_WIDTH - 0.5f * pauseMenu.getWidth();
     pauseMenu.y = 0.5f * constants::SCREEN_HEIGHT - 0.5f * pauseMenu.getHeight();

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include "Game.h"
 using namespace std;
 
@@ -13,6 +14,8 @@ int main(int argc, char* args[]) {
         cout << "SDL error: " << SDL_GetError() << endl;
     if (TTF_Init() != 0)
         cout << "SDL_ttf error: " << TTF_GetError() << endl;
+    if (Mix_Init(MIX_INIT_MP3) == 0)
+        cout << "SDL_mixer error: " << Mix_GetError() << endl;
     Game g(3, 7, 2);
     g.run();
 

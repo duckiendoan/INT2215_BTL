@@ -45,56 +45,6 @@ void Ball::updatePosition(double dt) {
     y -= (ballSpeed * dt) * sin(ballAngle);
 }
 
-void Ball::checkBrickCollision(std::vector<Sprite> &bricks, int& remainingBricks, int& score) {
-    for (int i = 0; i < bricks.size(); i++) {
-        GameObject brick = bricks[i];
-        if (brick.shown) {
-            if (GameObject::checkCollision(*this, brick)) {
-                bricks[i].shown = false;
-                remainingBricks--;
-                score += 30;
-
-                float ballcenterx = x + 0.5f * getWidth();
-                float ballcentery = y + 0.5f * getHeight();
-
-                // Center of the brick x and y coordinates
-                float brickcenterx = brick.x + 0.5f * brick.getWidth();
-                float brickcentery = brick.y + 0.5f * brick.getHeight();
-
-                float x_min = std::max(x, brick.x);
-                float x_max = std::min(x + getWidth(), brick.x + brick.getWidth());
-
-                float y_min = std::max(y, brick.y);
-                float y_max = std::min(y + getHeight(), brick.y + brick.getHeight());
-
-                float x_size = x_max - x_min;
-                float y_size = y_max - y_min;
-
-                if (y_size > x_size) {
-                    // Left
-                    if (ballcenterx < brickcenterx) {
-                        x -= x_size + 0.01f; // Move out of collision
-                    } else {
-                        x += x_size + 0.01f; // Move out of collision
-                    }
-                    ballAngle = -ballAngle - constants::PI;
-                } else {
-                    if (ballcentery > brickcentery) {
-                        // Bottom
-                        y += y_size + 0.01f; // Move out of collision
-                    } else {
-                        // Top
-                        y -= y_size + 0.01f; // Move out of collision
-                    }
-                    ballAngle = -ballAngle;
-                }
-
-            }
-
-        }
-    }
-}
-
 void Ball::resetPosition(GameObject &paddle) {
     x = paddle.x + paddle.getWidth() / 2 - paddle.getHeight() / 2;
     y = paddle.y - paddle.getHeight();

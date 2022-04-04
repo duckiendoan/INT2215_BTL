@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "Common.h"
 #include "Button.h"
-#include "Spritesheet.h"
+#include "Sprite.h"
 
 class RenderWindow
 {
