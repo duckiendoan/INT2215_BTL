@@ -4,6 +4,7 @@ BrickManager::BrickManager(int bricksPerRow, int numRows, Sprite &brickSprite) :
     bricksPerRow(bricksPerRow), numRows(numRows), brickSprite(brickSprite) {
     lastHitX = 0;
     lastHitY = 0;
+    lastHitTime = 0;
     remainingBricks = bricksPerRow * numRows;
 }
 

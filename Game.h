@@ -32,21 +32,22 @@ private:
     Sprite menuSprite = Sprite(1, 2, settingsMenuTex);
 
     // Pause buttons
-    Button pauseBtn = Button({0, 0, 50, 50}, pauseBtnTex, 1);
-    Button homeBtn = Button({0, 0, 203, 203}, pauseMenuBtnTex, 4);
-    Button continueBtn = Button({0, 203, 203, 203}, pauseMenuBtnTex, 4);
-    Button resetBtn = Button({0, 406, 203, 203}, pauseMenuBtnTex, 4);
-    Button nextLevelBtn = Button({0, 609, 203, 203}, pauseMenuBtnTex, 4);
-    ToggleButton musicCheckboxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex, 2);
-    ToggleButton sfxCheckBoxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex, 2);
-    Button okButton = Button({0, 100, 100, 100}, checkboxBtnTex, 2);
+    Button pauseBtn = Button({0, 0, 50, 50}, pauseBtnTex);
+    Button homeBtn = Button({0, 0, 203, 203}, pauseMenuBtnTex);
+    Button continueBtn = Button({0, 203, 203, 203}, pauseMenuBtnTex);
+    Button resetBtn = Button({0, 406, 203, 203}, pauseMenuBtnTex);
+    ToggleButton musicCheckboxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex);
+    ToggleButton sfxCheckBoxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex);
+    Button okButton = Button({0, 100, 100, 100}, checkboxBtnTex);
     GameObject pauseMenu = GameObject(0, 0, pauseMenuTex);
+    GameObject paddle = GameObject(0.4 * constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH, paddleTex);
+    Ball ball = Ball(0, 0, ballTex, 0, constants::DEFAULT_BALL_SPEED);
 
     // Start menu buttons
-    Button startBtn = Button({0, 0, 640, 180}, startMenuBtnTex, 4);
-    Button settingsBtn = Button({0, 180, 640, 180}, startMenuBtnTex, 4);
-    Button helpBtn = Button({0, 360, 640, 180}, startMenuBtnTex, 4);
-    Button exitBtn = Button({0, 540, 640, 180}, startMenuBtnTex, 4);
+    Button startBtn = Button({0, 0, 640, 180}, startMenuBtnTex);
+    Button settingsBtn = Button({0, 180, 640, 180}, startMenuBtnTex);
+    Button helpBtn = Button({0, 360, 640, 180}, startMenuBtnTex);
+    Button exitBtn = Button({0, 540, 640, 180}, startMenuBtnTex);
 
     Animator animator = Animator(window);
     SoundPlayer soundPlayer;
@@ -59,11 +60,12 @@ private:
     bool settingsMenu = false, helpMenu = false;
 
     GameState state = GAME_STATE_INITIAL;
-    void update(Ball& ball, GameObject& paddle, double dt);
-    void render(Ball& ball, GameObject& paddle);
-    void handlePaddleMovement(GameObject& paddle, const Uint8* currentKeyStates, bool mouse_moved);
-    void reset(Ball& ball, GameObject& paddle, bool next_level);
+    void update(double dt);
+    void render();
+    void handlePaddleMovement(const Uint8* currentKeyStates, bool mouse_moved);
+    void reset(bool next_level);
     void loadButtons();
     void loadStartMenuButtons();
     void loadPauseMenuButtons();
+    void handleMouseButtonUp();
 };

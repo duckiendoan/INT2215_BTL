@@ -7,7 +7,7 @@ public:
     Sprite(int rows, int columns, SDL_Texture *tex);
     bool getNextFrame();
     bool getFrame(int n);
-    int getFrameCount();
+    int getFrameCount() const;
     bool isPlaying = false;
     SDL_Rect srcRect;
 private:

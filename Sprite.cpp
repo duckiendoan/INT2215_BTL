@@ -43,6 +43,6 @@ bool Sprite::getFrame(int frameIndex) {
     return true;
 }
 
-int Sprite::getFrameCount() {
+int Sprite::getFrameCount() const {
     return maxFrameIndex + 1;
 }

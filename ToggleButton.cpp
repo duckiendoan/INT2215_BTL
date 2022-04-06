@@ -25,6 +25,6 @@ void ToggleButton::swapState()
     }
 }
 
-ToggleButton::ToggleButton(SDL_Rect p_srcRect, SDL_Texture *tex, int numBtn) : Button(p_srcRect, tex, numBtn) {
+ToggleButton::ToggleButton(SDL_Rect p_srcRect, SDL_Texture *tex) : Button(p_srcRect, tex) {
 
 }

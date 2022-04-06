@@ -1,13 +1,12 @@
 #include "Button.h"
 
-Button::Button(SDL_Rect p_srcRect, SDL_Texture *tex, int numBtn = 1) : srcRect(p_srcRect) {
+Button::Button(SDL_Rect p_srcRect, SDL_Texture *tex) : srcRect(p_srcRect) {
     texture = tex;
     originalWidth = p_srcRect.w;
     state = BUTTON_STATE_DEFAULT;
 
     currentFrame.x = 0;
     currentFrame.y = 0;
-    //SDL_QueryTexture(tex, nullptr, nullptr, &currentFrame.w, &currentFrame.h);
     currentFrame.w = srcRect.w;
     currentFrame.h = srcRect.h;
     shown = true;

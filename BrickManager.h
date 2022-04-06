@@ -13,6 +13,7 @@ public:
     int checkBallBricksCollision(Ball& ball);
     int getRemainingBricks() const;
     float lastHitX, lastHitY;
+    Uint64 lastHitTime;
 private:
     std::vector<Sprite> bricks;
     Sprite& brickSprite;

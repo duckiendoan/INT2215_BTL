@@ -10,8 +10,7 @@ enum ButtonState
 class Button: public GameObject
 {
 public:
-    Button(SDL_Rect srcRect, SDL_Texture* tex, int numBtn);
-
+    Button(SDL_Rect srcRect, SDL_Texture* tex);
     virtual void update();
     ButtonState state;
     SDL_Rect srcRect;

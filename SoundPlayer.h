@@ -10,7 +10,7 @@ public:
     void playMusic();
     void pauseMusic();
     void resumeMusic();
-    void playSfx(std::string effect);
+    void playSfx(const std::string& effect);
     bool musicPlaying = true, sfxPlaying = true;
 private:
     Mix_Music* music;
