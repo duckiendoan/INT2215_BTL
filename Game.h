@@ -38,10 +38,12 @@ private:
     Button resetBtn = Button({0, 406, 203, 203}, pauseMenuBtnTex);
     ToggleButton musicCheckboxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex);
     ToggleButton sfxCheckBoxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex);
+    ToggleButton twoBallCheckBoxBtn = ToggleButton({0, 0, 100, 100}, checkboxBtnTex);
     Button okButton = Button({0, 100, 100, 100}, checkboxBtnTex);
     GameObject pauseMenu = GameObject(0, 0, pauseMenuTex);
     GameObject paddle = GameObject(0.4 * constants::SCREEN_WIDTH, constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH, paddleTex);
     Ball ball = Ball(0, 0, ballTex, 0, constants::DEFAULT_BALL_SPEED);
+    Ball ball2 = Ball(0, 0, ballTex, 0, constants::DEFAULT_BALL_SPEED);
 
     // Start menu buttons
     Button startBtn = Button({0, 0, 640, 180}, startMenuBtnTex);
@@ -57,7 +59,7 @@ private:
     int attempts;
     int score;
     bool gameRunning;
-    bool settingsMenu = false, helpMenu = false;
+    bool settingsMenu = false, helpMenu = false, twoBall = false;
 
     GameState state = GAME_STATE_INITIAL;
     void update(double dt);

@@ -16,10 +16,9 @@ An attempt to recreate the classic [Atari Breakout](https://en.wikipedia.org/wik
 
 - [x]  Classic game features (ball, paddle and collisions)
 - [x]  Game menu
-- [ ]  Brick explosion on collision
+- [x]  Animation on brick collision
 - [x]  Unlimited levels
-- [ ]  Audio
-- [ ]  Themes
+- [x]  Audio
 
 ## Building
 
@@ -30,7 +29,7 @@ An attempt to recreate the classic [Atari Breakout](https://en.wikipedia.org/wik
 - Run the following command
 
 ```
-g++ -g *.cpp -I SDL2/include -L SDL2/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -o game.exe
+g++ -g *.cpp -I SDL2/include -L SDL2/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -o game.exe
 ```
 
 - Copy the runtime binaries to the output folder (copy `.dll` files)
@@ -47,6 +46,8 @@ brew install SDL2
 brew install SDL2_image
 
 brew install SDL2_ttf
+
+brew install SDL2_mixer
 ```
 
 - Go to [SDL2 Homepage](https://www.libsdl.org/download-2.0.php) and download SDL2-2.0.20.dmg

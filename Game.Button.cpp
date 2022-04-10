@@ -39,13 +39,19 @@ void Game::loadStartMenuButtons()
     okButton.x = menuSprite.x + menuSprite.getWidth() * 0.5f - 0.5f * okButton.getWidth();
     okButton.y = menuSprite.y + menuSprite.getHeight() * 0.82f;
 
-    musicCheckboxBtn.setScale(startBtn.getScale() + 0.3);
-    sfxCheckBoxBtn.setScale(startBtn.getScale() + 0.3);
+    musicCheckboxBtn.setScale(startBtn.getScale() + 0.1);
+    sfxCheckBoxBtn.setScale(startBtn.getScale() + 0.1);
+    twoBallCheckBoxBtn.setScale(musicCheckboxBtn.getScale());
+
     musicCheckboxBtn.x = menuSprite.x + menuSprite.getWidth() * 0.75f;
     sfxCheckBoxBtn.x = musicCheckboxBtn.x;
+    twoBallCheckBoxBtn.x = musicCheckboxBtn.x;
 
-    musicCheckboxBtn.y = menuSprite.y + menuSprite.getHeight() * 0.5f - musicCheckboxBtn.getHeight() * 0.7f;
+    musicCheckboxBtn.y = menuSprite.y + menuSprite.getHeight() * 0.4f - musicCheckboxBtn.getHeight() * 0.62f;
     sfxCheckBoxBtn.y = musicCheckboxBtn.y + 1.1f * musicCheckboxBtn.getHeight();
+    twoBallCheckBoxBtn.y = sfxCheckBoxBtn.y + 1.1f * sfxCheckBoxBtn.getHeight();
+
+    twoBallCheckBoxBtn.swapState();
 }
 
 void Game::loadPauseMenuButtons()

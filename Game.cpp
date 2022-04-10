@@ -11,7 +11,7 @@ Game::Game(int p_trials, int bricks_per_row, int num_rows)
 
 void Game::run() {
     loadButtons();
-    brickManager->generateBricks();
+    //brickManager->generateBricks();
     paddle.setScale(0.2f * constants::SCREEN_WIDTH / paddle.getWidth());
 
     float ballX = paddle.x + paddle.getWidth() * 0.5f - paddle.getHeight() * 0.5f;
@@ -20,9 +20,13 @@ void Game::run() {
 
     ball.x = ballX;
     ball.y = ballY;
+    ball2.x = ballX + ball.getWidth() + 15;
+    ball2.y = ballY;
     ball.ballAngle = ballAngle;
-    ball.setScale(paddle.getScale());
+    ball2.ballAngle = ballAngle + constants::PI / 2;
 
+    ball.setScale(paddle.getScale());
+    ball2.setScale(paddle.getScale());
     background.setScale(float(constants::SCREEN_WIDTH) / background.getWidth());
 
     state = GAME_STATE_INITIAL;
@@ -101,6 +105,7 @@ void Game::update(double dt) {
                 {
                     musicCheckboxBtn.update();
                     sfxCheckBoxBtn.update();
+                    twoBallCheckBoxBtn.update();
                 }
             }
             break;
@@ -114,7 +119,14 @@ void Game::update(double dt) {
             handlePaddleMovement(currentKeyStates, mouseMoved);
             ball.checkEdgeCollision(paddle, attempts);
             ball.checkPaddleCollision(paddle);
-            int newScore = brickManager->checkBallBricksCollision(ball);
+            int newScore = 0;
+            if (twoBall)
+            {
+                ball2.checkEdgeCollision(paddle, attempts);
+                ball2.checkPaddleCollision(paddle);
+                newScore += brickManager->checkBallBricksCollision(ball2);
+            }
+            newScore += brickManager->checkBallBricksCollision(ball);
 
             score += newScore;
             if (newScore > 0)
@@ -124,7 +136,8 @@ void Game::update(double dt) {
                 animator.startAnimation(brickManager->lastHitX, brickManager->lastHitY);
             }
             ball.updatePosition(dt);
-
+            if (twoBall)
+                ball2.updatePosition(dt);
             // Check game state
             if (brickManager->getRemainingBricks() == 0) state = GAME_STATE_WON;
             if (attempts < 0)
@@ -172,6 +185,7 @@ void Game::render() {
                 window.renderSprite(menuSprite);
                 window.renderButton(musicCheckboxBtn);
                 window.renderButton(sfxCheckBoxBtn);
+                window.renderButton(twoBallCheckBoxBtn);
                 window.renderButton(okButton);
             } else if (helpMenu)
             {
@@ -204,6 +218,8 @@ void Game::render() {
 
             window.render(paddle);
             window.render(ball);
+            if (twoBall)
+                window.render(ball2);
             brickManager->renderBricks(window);
 
             if (state == GAME_STATE_PAUSED)
@@ -253,7 +269,11 @@ void Game::reset(bool nextLevel) {
     paddle.x = 0.4 * constants::SCREEN_WIDTH;
     paddle.y = constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH;
     ball.resetPosition(paddle);
+    if (twoBall)
+        ball2.resetPosition(paddle);
     attempts = 3;
+    if (twoBall)
+        attempts += 3;
     score = 0;
     state = GAME_STATE_PLAYING;
 }
@@ -317,12 +337,12 @@ void Game::handleMouseButtonUp()
     else if (sfxCheckBoxBtn.state == BUTTON_STATE_HOVER)
     {
         sfxCheckBoxBtn.swapState();
-        if (soundPlayer.sfxPlaying)
-        {
-            soundPlayer.sfxPlaying = false;
-        } else {
-            soundPlayer.sfxPlaying = true;
-        }
+        soundPlayer.sfxPlaying = !soundPlayer.sfxPlaying;
+    }
+    else if (twoBallCheckBoxBtn.state == BUTTON_STATE_HOVER)
+    {
+        twoBallCheckBoxBtn.swapState();
+        twoBall = !twoBall;
     }
     else if (exitBtn.state == BUTTON_STATE_HOVER)
         gameRunning = false;
