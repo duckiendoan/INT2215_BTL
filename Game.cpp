@@ -16,14 +16,15 @@ void Game::run() {
 
     float ballX = paddle.x + paddle.getWidth() * 0.5f - paddle.getHeight() * 0.5f;
     float ballY = paddle.y - paddle.getHeight();
-    double ballAngle = constants::PI / (rand() % 6 + 2);
+    double ballAngle = constants::PI / (rand() % 6 + 2.5);
 
     ball.x = ballX;
     ball.y = ballY;
-    ball2.x = ballX + ball.getWidth() + 15;
+    ball2.x = ballX + ball.getWidth() + 30;
     ball2.y = ballY;
     ball.ballAngle = ballAngle;
-    ball2.ballAngle = ballAngle + constants::PI / 2;
+
+    ball2.ballAngle = constants::PI - ballAngle;
 
     ball.setScale(paddle.getScale());
     ball2.setScale(paddle.getScale());
@@ -124,6 +125,7 @@ void Game::update(double dt) {
             {
                 ball2.checkEdgeCollision(paddle, attempts);
                 ball2.checkPaddleCollision(paddle);
+                ball.checkBallCollision(ball2);
                 newScore += brickManager->checkBallBricksCollision(ball2);
             }
             newScore += brickManager->checkBallBricksCollision(ball);
@@ -139,7 +141,10 @@ void Game::update(double dt) {
             if (twoBall)
                 ball2.updatePosition(dt);
             // Check game state
-            if (brickManager->getRemainingBricks() == 0) state = GAME_STATE_WON;
+            if (brickManager->getRemainingBricks() == 0) {
+                state = GAME_STATE_WON;
+                brickManager->nextLevel();
+            }
             if (attempts < 0)
             {
                 attempts++;
@@ -161,6 +166,8 @@ void Game::update(double dt) {
             animator.updateAnimation();
             if (currentKeyStates[SDL_SCANCODE_RETURN]) {
                 reset(state == GAME_STATE_WON);
+            } else if (currentKeyStates[SDL_SCANCODE_ESCAPE]) {
+                state = GAME_STATE_INITIAL;
             }
             break;
         }
@@ -208,11 +215,11 @@ void Game::render() {
             window.renderText(attempt.c_str(), Score, 10, 10);
             window.renderText(scoreTxt.c_str(), Score, 10, 30);
             if (state == GAME_STATE_WON)
-                window.renderText("You won! Press [Enter] to enter the next level!", Score,
+                window.renderText("You won! Press [Enter] to enter the next level or [Esc] to go home!", Score,
                                   [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
                                   [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
             if (state == GAME_STATE_LOST)
-                window.renderText("Game over! Press [Enter] to try again!", Score,
+                window.renderText("Game over! Press [Enter] to try again or [Esc] to go home!", Score,
                                   [](int w, int h) { return constants::SCREEN_WIDTH / 2 - w / 2;},
                                   [](int w, int h) { return constants::SCREEN_HEIGHT / 2 - h / 2; });
 
@@ -263,14 +270,21 @@ void Game::handlePaddleMovement(const Uint8* currentKeyStates, bool mouse_moved)
 
 void Game::reset(bool nextLevel) {
     if (nextLevel) {
-        brickManager->nextLevel();
+        //brickManager->nextLevel();
     }
     brickManager->generateBricks();
     paddle.x = 0.4 * constants::SCREEN_WIDTH;
     paddle.y = constants::SCREEN_HEIGHT - 0.03 * constants::SCREEN_WIDTH;
+
     ball.resetPosition(paddle);
+    ball.ballAngle = constants::PI / (rand() % 6 + 2.5);
     if (twoBall)
-        ball2.resetPosition(paddle);
+    {
+        ball.ballAngle = constants::PI / (rand() % 4 + 3);
+        ball2.ballAngle = constants::PI - ball.ballAngle;
+        ball2.x = ball.x + ball.getWidth() + 20;
+        ball2.y = ball.y;
+    }
     attempts = 3;
     if (twoBall)
         attempts += 3;

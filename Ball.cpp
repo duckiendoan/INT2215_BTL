@@ -49,3 +49,42 @@ void Ball::resetPosition(GameObject &paddle) {
     x = paddle.x + paddle.getWidth() / 2 - paddle.getHeight() / 2;
     y = paddle.y - paddle.getHeight();
 }
+
+void Ball::checkBallCollision(Ball &other) {
+    if (GameObject::checkCollision(*this, other)) {
+        ballAngle = - (constants::PI - ballAngle);
+        other.ballAngle = - (constants::PI - other.ballAngle);
+
+        float thisX = x + 0.5f * getWidth();
+        float thisY = y + 0.5f * getHeight();
+
+        float otherX = other.x + 0.5f * other.getWidth();
+        float otherY = other.y + 0.5f * other.getHeight();
+
+        float x_min = std::max(x, other.x);
+        float x_max = std::min(x + getWidth(), other.x + other.getWidth());
+
+        float y_min = std::max(y, other.y);
+        float y_max = std::min(y + getHeight(), other.y + other.getHeight());
+
+        float x_size = x_max - x_min;
+        float y_size = y_max - y_min;
+
+        if (y_size > x_size) {
+            // Left
+            if (thisX < otherX) {
+                x -= x_size + 0.01f; // Move out of collision
+            } else {
+                x += x_size + 0.01f; // Move out of collision
+            }
+        } else {
+            if (thisY > otherY) {
+                // Bottom
+                y += y_size + 0.01f; // Move out of collision
+            } else {
+                // Top
+                y -= y_size + 0.01f; // Move out of collision
+            }
+        }
+    }
+}
