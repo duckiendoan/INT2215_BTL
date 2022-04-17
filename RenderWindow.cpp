@@ -101,7 +101,7 @@ void RenderWindow::renderText(const char *text, FontType type, int(*x)(int w, in
         std::cout << "Failed to render text: " << SDL_GetError() << std::endl;
     }
 
-    SDL_Texture* text_texture= SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_Texture* text_texture = SDL_CreateTextureFromSurface(renderer, textSurface);
     int w = textSurface->w;
     int h = textSurface->h;
     SDL_Rect dst = { x(w, h), y(w, h), w, h };

@@ -29,7 +29,7 @@ An attempt to recreate the classic [Atari Breakout](https://en.wikipedia.org/wik
 - Run the following command
 
 ```
-g++ -g *.cpp -I SDL2/include -L SDL2/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -o game.exe
+g++ -g *.cpp -I SDL2/include -I ./include -L SDL2/lib -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lSDL2_mixer -o game.exe
 ```
 
 - Copy the runtime binaries to the output folder (copy `.dll` files)
